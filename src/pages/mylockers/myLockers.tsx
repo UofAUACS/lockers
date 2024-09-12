@@ -73,7 +73,7 @@ export default function MyLockers() {
             </div>
             <div>
                 <div className="text-2xl font-semibold">My Orders</div>
-                {order.length > 0?<div className="flex flex-row flex-wrap">
+                {order && order.length > 0?<div className="flex flex-row flex-wrap">
                     {order.map((order: Order) => {return <OrderCard order={order} />})}
                 </div>: <div className="p-5">No orders to show</div>}
             </div>

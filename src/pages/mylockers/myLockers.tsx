@@ -1,5 +1,4 @@
 import { auth } from "@/firebase"
-import axios from "axios"
 import { GoogleAuthProvider, signInWithPopup, User } from "firebase/auth"
 import { useEffect, useState } from "react"
 
@@ -11,6 +10,8 @@ import {
     CardTitle,
   } from "@/components/ui/card"
 import { Locker, Order } from "@/types"
+import { axiosInstance } from "@/requests"
+import { v4 as uuid_v4 } from 'uuid';
   
 
 export default function MyLockers() {
@@ -39,7 +40,7 @@ export default function MyLockers() {
         if (user) {
             const getLockers = async () => {
                 const token = await user.getIdToken()
-                const res = await axios.get("https://services.uacs.ca/lockers/get-my-lockers", {
+                const res = await axiosInstance.get("/lockers/get-my-lockers", {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -48,7 +49,7 @@ export default function MyLockers() {
             }
             const getMyOrders = async () => {
                 const token = await user.getIdToken()
-                const res = await axios.get("https://services.uacs.ca/orders/get-my-orders", {
+                const res = await axiosInstance.get("/orders/get-my-orders", {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -68,13 +69,13 @@ export default function MyLockers() {
             <div>
                 <div className="text-2xl font-semibold">My Lockers</div>
                 {lockers && lockers.length > 0 ? <div className="flex flex-row flex-wrap">
-                    {lockers.map((locker: any) => {return <LockerCard locker={locker} />})}
+                    {lockers.map((locker: any) => {return <LockerCard locker={locker} key={uuid_v4()}/>})}
                 </div> : <div className="p-5">No lockers to show</div>}
             </div>
             <div>
                 <div className="text-2xl font-semibold">My Orders</div>
                 {order && order.length > 0?<div className="flex flex-row flex-wrap">
-                    {order.map((order: Order) => {return <OrderCard order={order} />})}
+                    {order.map((order: Order) => {return <OrderCard order={order} key={uuid_v4()}/>})}
                 </div>: <div className="p-5">No orders to show</div>}
             </div>
         </div>

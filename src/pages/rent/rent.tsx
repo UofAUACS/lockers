@@ -1,6 +1,5 @@
 import { auth } from "@/firebase";
 import { Locker } from "@/types";
-import axios from "axios";
 import { GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
 import { useEffect, useState } from "react";
 import {
@@ -12,11 +11,36 @@ import {
     DrawerTitle,
     DrawerTrigger,
   } from "@/components/ui/drawer"
+import { axiosInstance } from "@/requests";
+import { v4 as uuid_v4 } from "uuid";
   
 export default function Rent() {
     const [user, setUser] = useState<User | null>()
     const [availableLockers, setAvailableLockers] = useState<Locker[] | undefined>([])
     const [searchLocker, setSearchLocker] = useState<string>("")
+    const [success, setSuccess] = useState<boolean>(false)
+    const [error, setError] = useState<boolean>(false)
+
+    const handleSuccess = () => {
+        setSuccess(true)
+        setTimeout(() => {
+            setSuccess(false)
+        }, 3000)
+        return
+    }
+
+    const handleError = () => {
+        setError(true)
+        setTimeout(() => {
+            setError(false)
+        }, 3000)
+        return
+    }
+
+    const removeLocker = async (lockerNumber: number) => {
+        setAvailableLockers(availableLockers?.filter((locker) => locker.lockerNumber !== lockerNumber))
+    }
+
     const handleAuth = async () => {
         // check platform
         const provider = new GoogleAuthProvider();
@@ -36,7 +60,7 @@ export default function Rent() {
         
         const getData = async () => {
             const token = await user?.getIdToken()
-            const res = await axios.get("https://services.uacs.ca/lockers/get-available-lockers", {
+            const res = await axiosInstance.get("/lockers/get-available-lockers", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -74,15 +98,17 @@ export default function Rent() {
                             return true
                         }
                     }).map((locker) => {
-                        return <LockerCard key={locker.lockerNumber} lockerNumber = {locker.lockerNumber} user={user}/>
+                        return <LockerCard key={uuid_v4()} handleSuccess={handleSuccess} handleError={handleError} lockerNumber = {locker.lockerNumber} user={user} removeLocker={removeLocker}/>
                     })}
                     </div>}
+                    {success && <div className="bg-green-200 absolute top-0 left-0 m-3 p-3 rounded-md slide-in-x ">Request submitted!</div>}
+                    {error && <div className="bg-red-200 absolute top-0 left-0 m-3 p-3 rounded-md slide-in-x ">Error occured, refresh and try again!</div>}
             </div>
         </div>
     )
 }
 
-const LockerCard = ({lockerNumber, user}: {lockerNumber: number, user:User}) => {
+const LockerCard = ({lockerNumber, user, removeLocker, handleSuccess, handleError}: {lockerNumber: number, user:User, removeLocker: (lockerNumber:number) => void, handleSuccess: () => void, handleError: () => void} ) => {
     const [expiry, setExpiry] = useState<string>("F2024")
     const [transactionNumber, setTransactionNumber] = useState<string>("")
     const [missing, setMissing] = useState<boolean>(false)
@@ -101,22 +127,28 @@ const LockerCard = ({lockerNumber, user}: {lockerNumber: number, user:User}) => 
         const token = await user.getIdToken()
         const expiryMonth = expiry === "F2024" ? "Jan" : "May"
         const expiryYear = 2025
-        await axios.post("https://services.uacs.ca/lockers/order-rent-locker", {
-            "locker_id": lockerNumber,
-            "expiry": expiryMonth,
-            "year": expiryYear,
-            "transaction_id" : transactionNumber
-        }, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        try {
+            await axiosInstance.post("/lockers/order-rent-locker", {
+                "locker_id": lockerNumber,
+                "expiry": expiryMonth,
+                "year": expiryYear,
+                "transaction_id" : transactionNumber
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            handleSuccess()
+            removeLocker(lockerNumber)
+        } catch (error) {
+            handleError()
+        }
     }
     return (
         <div className="border rounded-md p-3 flex justify-between items-center">
             <div className="ml-3">Locker {lockerNumber}</div>
             <Drawer>
-                <DrawerTrigger className="bg-blue-300">Rent</DrawerTrigger>
+                <DrawerTrigger className=" border border-slate-300">Rent</DrawerTrigger>
                 <DrawerContent className="flex flex-col justify-center items-center">
                     <DrawerHeader>
                     <DrawerTitle className="mb-3">Your details</DrawerTitle>

@@ -22,13 +22,6 @@ export default ({ mode }) => {
         },
       },
       server: {
-        proxy: {
-          "/api": {
-            target: "https://services.uacs.ca",
-            changeOrigin: true,
-            rewrite: (path) => path.replace(/^\/api/, ""),
-          }
-        }
       }
     })
 }

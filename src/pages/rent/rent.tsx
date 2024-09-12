@@ -36,7 +36,7 @@ export default function Rent() {
         
         const getData = async () => {
             const token = await user?.getIdToken()
-            const res = await axios.get("/api/lockers/get-available-lockers", {
+            const res = await axios.get("https://services.uacs.ca/lockers/get-available-lockers", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -101,7 +101,7 @@ const LockerCard = ({lockerNumber, user}: {lockerNumber: number, user:User}) => 
         const token = await user.getIdToken()
         const expiryMonth = expiry === "F2024" ? "Jan" : "May"
         const expiryYear = 2025
-        await axios.post("/api/lockers/order-rent-locker", {
+        await axios.post("https://services.uacs.ca/lockers/order-rent-locker", {
             "locker_id": lockerNumber,
             "expiry": expiryMonth,
             "year": expiryYear,

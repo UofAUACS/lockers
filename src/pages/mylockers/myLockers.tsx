@@ -39,7 +39,7 @@ export default function MyLockers() {
         if (user) {
             const getLockers = async () => {
                 const token = await user.getIdToken()
-                const res = await axios.get("/api/lockers/get-my-lockers", {
+                const res = await axios.get("https://services.uacs.ca/lockers/get-my-lockers", {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -48,7 +48,7 @@ export default function MyLockers() {
             }
             const getMyOrders = async () => {
                 const token = await user.getIdToken()
-                const res = await axios.get("/api/orders/get-my-orders", {
+                const res = await axios.get("https://services.uacs.ca/orders/get-my-orders", {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

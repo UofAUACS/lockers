@@ -45,7 +45,6 @@ export default function MyLockers() {
                     }
                 })
                 setLockers(res.data.lockers)
-                console.log(res.data.lockers)
             }
             const getMyOrders = async () => {
                 const token = await user.getIdToken()
@@ -55,7 +54,6 @@ export default function MyLockers() {
                     }
                 })
                 setOrders(res.data.orders)
-                console.log(res.data.orders)
             }
             getLockers()
             getMyOrders()

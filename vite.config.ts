@@ -10,7 +10,7 @@ export default ({ mode }) => {
 
     {
       plugins: [react()],
-      base: "/lockers",
+      base: "/",
       css: {
         postcss: {
           plugins: [tailwindcss()],

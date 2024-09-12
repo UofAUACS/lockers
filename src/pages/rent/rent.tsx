@@ -42,7 +42,6 @@ export default function Rent() {
                 }
             })
             setAvailableLockers(res.data.lockers)
-            console.log(token)
         }
         
         getData()

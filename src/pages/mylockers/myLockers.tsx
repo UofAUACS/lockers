@@ -69,7 +69,7 @@ export default function MyLockers() {
             </div>}
             <div>
                 <div className="text-2xl font-semibold">My Lockers</div>
-                {lockers.length > 0 ? <div className="flex flex-row flex-wrap">
+                {lockers && lockers.length > 0 ? <div className="flex flex-row flex-wrap">
                     {lockers.map((locker: any) => {return <LockerCard locker={locker} />})}
                 </div> : <div className="p-5">No lockers to show</div>}
             </div>

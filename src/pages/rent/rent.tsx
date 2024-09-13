@@ -97,7 +97,7 @@ export default function Rent() {
                         } else {
                             return true
                         }
-                    }).map((locker) => {
+                    }).sort((a:Locker, b:Locker) => a.lockerNumber < b.lockerNumber ? -1 : 1).map((locker) => {
                         return <LockerCard key={uuid_v4()} handleSuccess={handleSuccess} handleError={handleError} lockerNumber = {locker.lockerNumber} user={user} removeLocker={removeLocker}/>
                     })}
                     </div>}

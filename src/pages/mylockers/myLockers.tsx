@@ -9,6 +9,16 @@ import {
     CardHeader,
     CardTitle,
   } from "@/components/ui/card"
+
+  import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+  } from "@/components/ui/drawer"
 import { Locker, Order } from "@/types"
 import { axiosInstance } from "@/requests"
 import { v4 as uuid_v4 } from 'uuid';
@@ -69,7 +79,7 @@ export default function MyLockers() {
             <div>
                 <div className="text-2xl font-semibold">My Lockers</div>
                 {lockers && lockers.length > 0 ? <div className="flex flex-row flex-wrap">
-                    {lockers.map((locker: any) => {return <LockerCard locker={locker} key={uuid_v4()}/>})}
+                    {lockers.map((locker: any) => {return <LockerCard locker={locker} key={uuid_v4()} user={user!}/>})}
                 </div> : <div className="p-5">No lockers to show</div>}
             </div>
             <div>
@@ -113,10 +123,63 @@ const OrderCard = ({ order }: {order: Order}) => {
     )
 }
 
-const LockerCard = ({ locker }: {locker: Locker}) => {
+const LockerCard = ({ locker, user }: {locker: Locker, user:User}) => {
     const [combinationHidden, setCombinationHidden] = useState(true)
+    const [expiry, setExpiry] = useState<string>("F2024")
+    const [transactionNumber, setTransactionNumber] = useState<string>("")
+    const [missing, setMissing] = useState<boolean>(false)
+
+    const [success, setSuccess] = useState<boolean>(false)
+    const [error, setError] = useState<boolean>(false)
+
+    const handleExpiry = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setExpiry(e.target.value)
+    }
+    const handleTransactionNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTransactionNumber(e.target.value)
+    }
+
+    const handleSuccess = () => {
+        setSuccess(true)
+        setTimeout(() => {
+            setSuccess(false)
+        }, 5000)
+    }
+
+    const handleError = () => {
+        setError(true)
+        setTimeout(() => {
+            setError(false)
+        }, 5000)
+    }
+
+    const onSubmit = async () => {
+        if (!transactionNumber) {
+            setMissing(true)
+            return
+        }
+        const token = await user.getIdToken()
+        const expiryMonth = expiry === "F2024" ? "Jan" : "May"
+        const expiryYear = 2025
+        try {
+            await axiosInstance.post(`/lockers/renew-locker?locker_number=${locker.lockerNumber}`, {
+                "expiry": expiryMonth,
+                "year": expiryYear,
+                "transaction_id" : transactionNumber
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            handleSuccess()
+        } catch (error) {
+            handleError()
+        }
+    }
     return (
         <Card className="w-40 m-3">
+            {error && <div className="fixed top-0 left-0 bg-red-200 m-2 p-2 rounded-md slide-in-x">Error Occured! Refresh and try again.</div>}
+            {success && <div className="fixed top-0 left-0 bg-green-200 m-2 p-2 rounded-md slide-in-x">Request Successful!</div>}
             <CardHeader>
                 <CardTitle>Locker {locker.lockerNumber}</CardTitle>
             </CardHeader>
@@ -128,6 +191,42 @@ const LockerCard = ({ locker }: {locker: Locker}) => {
                     </div>
                     {/* <div className="">{locker.combination}</div> */}
                     <div>Expiry: {locker.expiryDate} {locker.year}</div>
+                    <Drawer>
+                        <DrawerTrigger className=" border bg-green-100">Renew</DrawerTrigger>
+                        <DrawerContent className="flex flex-col justify-center items-center">
+                            <DrawerHeader>
+                            <DrawerTitle className="mb-3">Your details</DrawerTitle>
+                            <div>
+                                <div>Locker {locker.lockerNumber}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm font-light text-left ">Email:</div>
+                                {user.email && <input type="text" value={user.email} disabled className="w-full border rounded-sm p-2 text-sm" />}
+                            </div>
+                            <div className="mt-2 text-left">
+                                <input type="radio" value="F2024" id="regular" className="" checked={expiry === "F2024"} onChange={handleExpiry}/>
+                                <label htmlFor="regular" className="ml-2">Fall 2024</label>
+                                <br/>
+                                <input type="radio" value="FW2025" id="medium" checked={expiry === "FW2025"} onChange={handleExpiry}/>
+                                <label htmlFor="medium" className="ml-2">Fall 2024 + Winter 2025</label>
+
+                            </div>
+                            <div className="mt-2 text-left">
+                            <div className="text-sm font-light w-3/4">Please interact the required amount on execs@uacs.ca | $10 per semester + $5 deposit</div>
+                            <input type="text" placeholder="Interact Transaction Number" className="w-full border rounded-sm p-2 text-sm mt-2" onChange={handleTransactionNumber} value={transactionNumber} />
+                            </div>
+                            <div className="mt-3 text-sm font-light text-left">You will recieve an email once your request is approved!</div>
+                            {missing && <div className="text-red-300 text-sm italic">*Trasaction number required.</div>}
+                            </DrawerHeader>
+                            <DrawerFooter>
+                                <div className="flex space-x-4">
+                                <DrawerClose className="bg-red-100 w-36">Cancel</DrawerClose>
+                                {!transactionNumber && <button className  ="bg-green-200 w-36" onClick={() => setMissing(true)}>Send Request</button>}
+                                {transactionNumber && <DrawerClose className  ="bg-green-200 w-36" onClick={onSubmit}>Send Request</DrawerClose>}
+                                </div>
+                            </DrawerFooter>
+                        </DrawerContent>
+                    </Drawer>
                 </div>
             </CardContent>
         </Card>

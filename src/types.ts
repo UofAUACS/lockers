@@ -1,8 +1,14 @@
 export type Locker = {
+    id: string,
     lockerNumber: number,
-    combination?: string,
-    expiryDate?: string,
-    year?: number,
+    ownerEmail: string,
+    previousOwnerEmail: string,
+    combination: string,
+    expiryDate: string,
+    newExpirationDate: string,
+    status: string,
+    notes: string,
+    year: number,
 }
 
 export type Order = {

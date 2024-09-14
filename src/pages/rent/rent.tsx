@@ -101,8 +101,8 @@ export default function Rent() {
                         return <LockerCard key={uuid_v4()} handleSuccess={handleSuccess} handleError={handleError} lockerNumber = {locker.lockerNumber} user={user} removeLocker={removeLocker}/>
                     })}
                     </div>}
-                    {success && <div className="bg-green-200 absolute top-0 left-0 m-3 p-3 rounded-md slide-in-x ">Request submitted!</div>}
-                    {error && <div className="bg-red-200 absolute top-0 left-0 m-3 p-3 rounded-md slide-in-x ">Error occured, refresh and try again!</div>}
+                    {success && <div className="bg-green-200 fixed top-0 left-0 m-3 p-3 rounded-md slide-in-x ">Request submitted!</div>}
+                    {error && <div className="bg-red-200 fixed top-0 left-0 m-3 p-3 rounded-md slide-in-x ">Error occured, refresh and try again!</div>}
             </div>
         </div>
     )
